@@ -1,0 +1,17 @@
+#part name, and mass in g (me=electron mass, mp=proton, mn=neutron, mep=me+mp, mpne=mp+mn+me)
+H	mep
+H(2)	mep
+C	6*mep
+C(1D)	6*mep
+O	8*mpne
+N	7*mpne
+O(1D)	8*mpne
+O(1S)	8*mpne
+M	0*mpne
+O(3P)	8*mpne
+S	16*mpne
+_1	0e0
+_3	0e0
+e	me
+# excited-state label (e.g., CS2E for photoexcited CS2)
+E   0e0 
