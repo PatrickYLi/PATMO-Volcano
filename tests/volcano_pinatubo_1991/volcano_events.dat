@@ -1,0 +1,151 @@
+# PATMO volcanic forcing input
+#
+# One active event per non-comment line. Use key=value pairs; spaces around "="
+# are allowed, and "," may be used as a separator. Lines beginning with "#"
+# or "!" are ignored. Inline comments after "#" or "!" are also ignored.
+#
+# Required keys for each event:
+#   event_id              free text label for your own bookkeeping
+#   start_day             eruption start time from volcano t=0 [day]
+#                         In test.f90, volcano t=0 is reset only after the
+#                         no-volcano background atmosphere reaches steady state.
+#                         aliases: start_hour, start_s
+#   duration_day          time interval with active SO2 injection [day]
+#                         aliases: duration_hour, duration_s
+#   plume_center_km       center altitude of the volcanic plume [km]
+#                         aliases: altitude_km, injection_altitude_km
+#   plume_sigma_km        Gaussian vertical width of the plume [km]
+#
+# More intuitive plume geometry:
+#   plume_top_km          top of the main injection layer [km]
+#   plume_bottom_km       bottom of the main injection layer [km]
+#                         If center/sigma are omitted, the code uses
+#                         center=(top+bottom)/2 and sigma=(top-bottom)/4.
+#   plume_fwhm_km         full width at half maximum [km]
+#                         If sigma is omitted, sigma=fwhm/2.35482.
+#
+# SO2 source keys:
+#   so2_flux_cm2_s        SO2 column source [molecules cm-2 s-1]
+#                         The code distributes this over height as a Gaussian
+#                         source with units molecules cm-3 s-1.
+#   so2_column_cm2        total SO2 column injected during duration_day
+#                         [molecules cm-2]; code divides by duration.
+#   so2_mass_tg           total emitted SO2 mass [Tg = Mt]
+#                         Requires either plume_radius_km or injection_area_km2
+#                         so the code can convert mass to a 1-D column source.
+#   plume_radius_km       radius of the simplified circular injection area [km]
+#   injection_area_km2    direct injection area [km2], used instead of radius.
+#
+# Optical shielding is split into two particle budgets:
+#
+#   ash_tau_550           primary volcanic ash 550 nm column optical depth [-].
+#                         Use this for short-lived local ash shading. A reliable
+#                         Pinatubo local visible AOD value is hard to assign
+#                         because ash was rapidly transported, rained out, and
+#                         mixed with ice; treat this as a sensitivity knob.
+#   sulfate_tau_550       emitted precursor optical potential [-]. This would
+#                         become tau550 after full conversion with no losses.
+#                         NOT the realized local peak or a yield from SO2 mass.
+#
+# Ash rise/radiation/transport keys:
+#   ash_rise_start_km     fixed ash source altitude throughout emission [km].
+#                         Default is 0 km. For a real volcano you can use vent
+#                         altitude. Aliases: vent_altitude_km,
+#                         plume_rise_start_km
+#   ash_rise_time_hour    nominal transit time setting the upward speed [hour].
+#                         Flow persists for duration + rise_time; no emission
+#                         is added after duration. Speed tapers to zero across
+#                         center +/- 2 sigma. This is not exact arrival time.
+#                         Zero retains Gaussian high-altitude injection.
+#                         Aliases: ash_rise_time_day, ash_rise_time_s.
+#   ash_lifetime_day      e-folding decay time after ash emission ends [day].
+#                         This is not the Pinatubo sulfate lifetime. Use a
+#                         short local value unless you are testing persistent
+#                         very fine ash.
+#   ash_horizontal_lifetime_day
+#                         local horizontal export / dilution e-folding time
+#                         [day] for this 1-D column. <=0 disables this loss.
+#   ash_settling_cm_s     direct downward settling speed [cm s-1].
+#                         If this is >0, it is used directly.
+#                         aliases: ash_settling_m_s, ash_settling_km_day
+#   ash_particle_radius_um
+#                         if ash_settling is not positive, use this radius with
+#                         Stokes settling to estimate the downward velocity.
+#                         1-10 um is a fine-ash sensitivity range; values are
+#                         strongly particle-size dependent.
+#   ash_particle_density_g_cm3
+#                         ash density used by Stokes settling [g cm-3];
+#                         2-3 g cm-3 is a common volcanic-ash range.
+#   ash_cunningham_factor fixed slip-correction factor used by the present
+#                         first-stage settling calculation. A value of 1.9 is
+#                         representative near 22 km for a 2 um ash radius.
+#   ash_vertical_diffusion_cm2_s
+#                         density-weighted mixing coefficient [cm2 s-1].
+#                         background uses profile.dat Kzz; 0 disables mixing.
+#                         Positive numbers override Kzz for sensitivity tests.
+#   ash_lambda_exponent   spectral scaling alpha:
+#                         tau(lambda)=tau550*(lambda/550nm)^(-alpha).
+#                         Large ash particles are closer to gray scattering
+#                         than sulfate; keep this as a sensitivity value.
+#
+# Sulfate aerosol formation/radiation/transport keys:
+#   sulfate_rise_start_km fixed precursor source altitude during emission.
+#                         Default follows ash_rise_start_km.
+#   sulfate_rise_time_hour
+#                         nominal transit time; default follows ash. Precursor
+#                         rises continuously and forms SSA in its current layer.
+#                         Formed SSA shares this airflow with its own settling;
+#                         it is never assigned the ash distribution.
+#   sulfate_formation_day first-order e-folding time: an isolated packet
+#                         converts 63.2 percent after this time, not 100 percent.
+#                         25 day is a Pinatubo-informed approximation; 33 day
+#                         is a sensitivity alternative. Precursor does NOT
+#                         settle. This does not call the chemistry solver.
+#   sulfate_lifetime_day  additional particle-only removal e-folding time from
+#                         formation onward; negative disables, zero is instant.
+#                         Default -1 avoids counting a global observed decay
+#                         again alongside explicit settling and local export.
+#   sulfate_horizontal_lifetime_day
+#                         local-column export / dilution e-folding time [day].
+#                         This is not removal from the global stratosphere; it
+#                         represents the plume leaving the chosen 1-D column.
+#   sulfate_particle_radius_um
+#                         fixed spherical settling radius, not a direct
+#                         substitute for a size-distribution effective radius.
+#                         Pinatubo sulfate particles were commonly about
+#                         0.3-0.5 um after several months.
+#   sulfate_particle_density_g_cm3
+#                         bulk H2SO4/H2O droplet density. 1.6 g cm-3 is a
+#                         simple representative value, not a unique observation.
+#   sulfate_cunningham_factor
+#                         fixed slip correction for the present first-stage
+#                         settling calculation. A value of 6.3 is representative
+#                         near 22 km for a 0.4 um sulfate aerosol radius.
+#   sulfate_vertical_diffusion_cm2_s
+#                         simple 1-D vertical diffusion/broadening for sulfate.
+#   sulfate_lambda_exponent
+#                         sulfate wavelength scaling alpha. Replace this with
+#                         measured extinction spectra for quantitative studies.
+#
+# Suggested sensitivity knobs:
+#   local ash:       ash_tau_550 ~ 0.1-1 with ash lifetimes of hours-days
+#   sulfate forcing: sulfate_tau_550 ~ 0.15 global mean, ~0.3-0.4 tropical band
+#   high injection:  plume_center_km >= 20 for stratospheric SO2 experiments
+#
+# Active Pinatubo-style split-particle case.
+# 9 h uniform vent emission is distinct from the assumed 0.5 h transit scale.
+# 0 km is an idealized ground coordinate, not measured vent elevation.
+# Radius 2500 km is a regional average, NOT a near-vent observation site.
+# Tau budgets, 1/14 day horizontal export, radii and spectral slopes are
+# sensitivity assumptions. Ash residual 2 day loss is additional to export.
+# Both particles and precursor share background mixing. Settling is separate
+# with FIXED reference-height Cc, viscosity and radius for each particle type.
+# See reports/pinatubo_parameter_review_2026-09-08.md for source limitations.
+# start_day=0 means "immediately after background equilibrium" in test.f90.
+# duration_hour=9 follows the main climactic injection approximation; this is
+# still averaged over the chosen duration, not a pulsed eruption sequence.
+event_id=pinatubo_split_column start_day=0d0 duration_hour=9d0 plume_bottom_km=20d0 plume_top_km=25d0 so2_mass_tg=20d0 plume_radius_km=2500d0 ash_tau_550=0.4d0 ash_rise_start_km=0d0 ash_rise_time_hour=0.5d0 ash_lifetime_day=2d0 ash_horizontal_lifetime_day=1d0 ash_particle_radius_um=2d0 ash_particle_density_g_cm3=2.5d0 ash_gravity_cm_s2=980.665d0 ash_air_viscosity_g_cm_s=1.7d-4 ash_cunningham_factor=1.9d0 ash_vertical_diffusion_cm2_s=background ash_lambda_exponent=0.2d0 sulfate_tau_550=0.15d0 sulfate_rise_start_km=0d0 sulfate_rise_time_hour=0.5d0 sulfate_formation_day=25d0 sulfate_lifetime_day=-1d0 sulfate_horizontal_lifetime_day=14d0 sulfate_particle_radius_um=0.4d0 sulfate_particle_density_g_cm3=1.6d0 sulfate_gravity_cm_s2=980.665d0 sulfate_air_viscosity_g_cm_s=1.7d-4 sulfate_cunningham_factor=6.3d0 sulfate_vertical_diffusion_cm2_s=background sulfate_lambda_exponent=0.8d0
+
+# Optional sensitivity examples. Uncomment one at a time if needed.
+# event_id=pinatubo_tropical_sulfate start_day=0d0 duration_hour=9d0 plume_bottom_km=20d0 plume_top_km=25d0 so2_mass_tg=20d0 plume_radius_km=2500d0 ash_tau_550=0.2d0 ash_rise_start_km=0d0 ash_rise_time_hour=0.5d0 ash_lifetime_day=1d0 ash_horizontal_lifetime_day=0.5d0 ash_particle_radius_um=2d0 ash_particle_density_g_cm3=2.5d0 ash_cunningham_factor=1.9d0 ash_vertical_diffusion_cm2_s=background ash_lambda_exponent=0.2d0 sulfate_tau_550=0.35d0 sulfate_formation_day=25d0 sulfate_lifetime_day=-1d0 sulfate_horizontal_lifetime_day=14d0 sulfate_particle_radius_um=0.4d0 sulfate_particle_density_g_cm3=1.6d0 sulfate_cunningham_factor=6.3d0 sulfate_vertical_diffusion_cm2_s=background sulfate_lambda_exponent=0.8d0
+# event_id=ash_only_short_local start_day=0d0 duration_hour=9d0 plume_bottom_km=20d0 plume_top_km=25d0 so2_mass_tg=20d0 plume_radius_km=2500d0 ash_tau_550=0.4d0 ash_rise_start_km=0d0 ash_rise_time_hour=0.5d0 ash_lifetime_day=2d0 ash_horizontal_lifetime_day=1d0 ash_particle_radius_um=2d0 ash_particle_density_g_cm3=2.5d0 ash_cunningham_factor=1.9d0 ash_vertical_diffusion_cm2_s=background ash_lambda_exponent=0.2d0

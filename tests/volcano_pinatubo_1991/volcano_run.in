@@ -1,0 +1,9 @@
+! Formal chemistry simulation only (./test), not ./test_volcano.
+! A year is 365 days. The volcano clock starts only AFTER background equilibrium.
+&volcano_run
+  spinup_max_years = 40d0       ! Upper limit, not a forced 40-year spin-up.
+  volcano_duration_day = 730d0 ! Includes all event start times and output windows.
+  equilibrium_relative_limit = 1d-4 ! Maximum daily relative change, all species/layers.
+  equilibrium_mixing_floor = 1d-15  ! Dimensionless mixing-ratio floor for tiny abundances.
+  stable_days_required = 30        ! Consecutive successful daily checks.
+/

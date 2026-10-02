@@ -1,0 +1,14 @@
+! Formal chemistry outputs (./test). All times below are SECONDS since first eruption.
+! The final requested time is included even if it is not a multiple of the interval.
+! every_s <= 0 disables that output. end_s must fit inside volcano_duration_day.
+&history_output
+  species_names = 'SO2'       ! Example: 'SO2', 'SO3', 'H2SO4'. Names must exist in the network.
+  species_every_s = 3600d0
+  species_end_s = 259200d0    ! 72 hours
+  reaction_ids = 0           ! 0 means all reactions. Otherwise give IDs, e.g. 33, 34, 56.
+  reaction_every_s = 3600d0   ! k or J and instantaneous event rate, not integrated flux.
+  reaction_end_s = 259200d0
+  solar_every_s = 21600d0    ! Every 6 hours; all layers and model wavelength bins.
+  solar_end_s = 259200d0
+  history_prefix = 'volcano_history'
+/

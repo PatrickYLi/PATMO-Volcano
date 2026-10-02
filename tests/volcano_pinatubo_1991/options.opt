@@ -1,0 +1,16 @@
+network = tests/volcano_pinatubo_1991/reaction_network.ntw
+cellsNumber = 60
+cellThickness = 1000
+photoBinsNumber = 4400
+wavelengMin = 120
+wavelengMax = 400
+zenith_angle = 60
+TOA_para = 0.5
+usePhotochemistry = T
+useHescape = F
+useWaterRemoval = F
+useAerosolformation = T
+gravity_species = SO4:gd(j)
+constant_species = HO2, N, CO2, H2O, CO, O2, N2, OH, O, H2, H, O3,
+drydep_species = COS:9.5d-3, CS2:4.48d-2, SO2:1, H2S:1.7d-1, CH3SCH3:1.48d-1
+emission_species = COS:8.1001d2, CS2:5.9886d2, H2S:84.7910d2, SO2:615.84d2, CH3SCH3:39.50274d3

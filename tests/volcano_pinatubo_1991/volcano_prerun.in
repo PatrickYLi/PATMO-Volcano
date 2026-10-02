@@ -1,0 +1,46 @@
+# PATMO volcano optical-depth pre-run settings
+#
+# This file controls the standalone ./test_volcano run in the build folder.
+# It does not run the chemistry solver. It only samples the volcanic
+# ash+sulfate optical-depth contribution from patmo_volc.f90.
+#
+# Input files copied into build by compile.sh volcano_pinatubo_1991
+event_file = volcano_events.dat
+profile_file = profile.dat
+photo_metric_file = xsecs/photoMetric.dat
+
+# Output files in build/
+# volcano_optical_depth.dat has total, ash, and sulfate cumulative shielding.
+# The total columns are what photolysis sees.
+# volcano_ash_profile.dat is separated local ash and sulfate layer loading.
+output_file = volcano_optical_depth.dat
+ash_profile_file = volcano_ash_profile.dat
+
+# Time sampling. Use one of:
+#   output_time_step_s
+#   output_time_step_hour
+#   output_time_step_day
+# The output column named "time" uses the same unit as the selected key.
+# Use hour-scale output to resolve the first-day eruption stage.
+output_time_step_hour = 1d0
+
+# Resolve rapid plume establishment without storing the entire run every 5 min.
+# Time labels remain hours. Set early step to 0 to disable extra early samples.
+output_early_time_step_s = 300d0
+output_early_until_hour = 1d0
+
+# Wavelength sampling in nm.
+#   1d0 gives about every 1 nm.
+#   5d0 gives about every 5 nm.
+#   <=0 outputs every internal model photo bin.
+output_wavelength_step_nm = 5d0
+
+# Auto-stop threshold for volcanic optical depth.
+# Because exponential decay never reaches exactly zero, "fully dissipated"
+# means an upper bound on all current AND future ash/SSA optical depth
+# (including unconverted precursor, at every model wavelength) is below this
+# value, after every event has finished. Set output_end_day > 0 to override.
+# For example,
+# output_end_day = 3d0 writes only the first 72 hours.
+tau_floor = 1d-6
+output_end_day = -1d0
