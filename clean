@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+import glob
+import shutil
+import os
+
+os.chdir(".")
+
+hasrm = False
+
+
+def remover(paths):
+    """Remove files matching fileType in the given paths."""
+    hasrm_local = False
+    for pp in paths:
+        # Clear files with given extension in subfolders
+        for root, dirs, files in os.walk(pp["path"]):
+            path = root
+            if not path.endswith("/"):
+                path += "/"
+            for x in files:
+                if not x.endswith(pp["fileType"]):
+                    continue
+                print(f"removing ./{path}{x}")
+                os.remove(os.path.join(path, x))
+                hasrm_local = True
+    return hasrm_local
+
+
+# Remove temp files (~, .pyc) from subfolders
+for root, dirnames, filenames in os.walk("."):
+    for fle in filenames:
+        remove = False
+        for ty in [".pyc"]:
+            if fle.endswith(ty):
+                remove = True
+                break
+        if fle.endswith("~") or remove:
+            fname = os.path.join(root, fle)
+            os.unlink(fname)
+            print(f"removing ./{fname}")
+            hasrm = True
+
+hasrm = remover([
+    {"path": "./reports/xsecs", "fileType": ".dat"},
+    {"path": "./htmlDocs/rateReversePNGs", "fileType": ".png"},
+    {"path": "./htmlDocs", "fileType": ".html"},
+    {"path": "./htmlDocs/ratePNGs", "fileType": ".png"},
+])
+
+# Clear build (files)
+for root, dirs, files in os.walk("./build/"):
+    path = root
+    if not path.endswith("/"):
+        path += "/"
+    for x in files:
+        print(f"removing ./{path}{x}")
+        os.remove(os.path.join(path, x))
+        hasrm = True
+
+# Clear build (dirs)
+for root, dirs, files in os.walk("./build/"):
+    path = root
+    if not path.endswith("/"):
+        path += "/"
+    for x in dirs:
+        print(f"removing ./{path}{x}")
+        shutil.rmtree(os.path.join(path, x))
+        hasrm = True
+
+# Add README file in build if not present
+fname = "build/README"
+if not os.path.isfile(fname):
+    print("adding README in ./build")
+    with open(fname, "w") as fout:
+        fout.write("this folder will contain the built files\n")
+
+if not hasrm:
+    print("nothing to clean")
+
+print("done!")
